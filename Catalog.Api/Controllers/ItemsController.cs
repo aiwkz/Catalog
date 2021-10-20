@@ -25,10 +25,15 @@ namespace Catalog.Api.Controllers
         
         // GET /items
         [HttpGet]
-        public async Task<IEnumerable<ItemDto>> GetItemsAsync()
+        public async Task<IEnumerable<ItemDto>> GetItemsAsync(string name = null)
         {
             var items = (await repository.GetItemsAsync())
                         .Select(item => item.AsDto());
+
+            if(!string.IsNullOrWhiteSpace(name))
+            {
+                items = items.Where(item => item.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+            }
 
             logger.LogInformation($"{DateTime.UtcNow.ToString("hh:mm:ss")}: Retrieved {items.Count()} items");
 
@@ -87,18 +92,18 @@ namespace Catalog.Api.Controllers
 
         // DELETE /items/{id}
         [HttpDelete("{id}")]
-         public async Task<ActionResult> DeteleItemAsync(Guid id)
-         {
-            var existingItem = await repository.GetItemAsync(id);
+        public async Task<ActionResult> DeteleItemAsync(Guid id)
+        {
+        var existingItem = await repository.GetItemAsync(id);
 
-            if (existingItem is null) 
-            {
-                return NotFound();
-            }
+        if (existingItem is null) 
+        {
+            return NotFound();
+        }
 
-            await repository.DeleteItemAsync(id);
+        await repository.DeleteItemAsync(id);
 
-            return NoContent();
-         }
+        return NoContent();
+        }
     }
 }
